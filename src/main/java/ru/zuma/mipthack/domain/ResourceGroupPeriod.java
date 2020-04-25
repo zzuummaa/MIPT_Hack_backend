@@ -3,10 +3,7 @@ package ru.zuma.mipthack.domain;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Data
@@ -17,6 +14,10 @@ public class ResourceGroupPeriod {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
+
+    @ManyToOne
+    @JoinColumn(name="resource_group_id", nullable=false)
+    private ResourceGroup resourceGroupID;
 
     @Column(name = "available_capacity", nullable = false)
     private Long availableCapacity;

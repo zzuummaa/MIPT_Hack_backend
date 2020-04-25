@@ -1,4 +1,5 @@
 ext {
     swaggerSpringVersion = "2.9.2"
     swaggerVersion = "1.5.21"
+    h2Version = "1.4.199"
 }
