@@ -17,7 +17,7 @@ import java.util.Set;
 public class COL {
     @Id
     @GeneratedValue
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
     @Column(name = "col_alloc", nullable = false)

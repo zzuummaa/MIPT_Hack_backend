@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @Table(name = "resource_group_period")
 public class ResourceGroupPeriod {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, unique = true)
     private String id;
 
     @ManyToOne

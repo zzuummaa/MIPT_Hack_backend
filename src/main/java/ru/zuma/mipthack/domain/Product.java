@@ -18,9 +18,13 @@ import javax.persistence.Table;
 @Table(name = "product")
 public class Product {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, unique = true)
     private String id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
+
+    public Product(String id) {
+        this.id = id;
+    }
 }

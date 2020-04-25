@@ -16,11 +16,15 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @Entity
 @Table(name = "stocking_point")
-public class StokingPoints {
+public class StockingPoint {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, unique = true)
     private String id;
 
-    @Column(name = "name")
+    @Column(name = "s_name")
     private String name;
+
+    public StockingPoint(String id) {
+        this.id = id;
+    }
 }

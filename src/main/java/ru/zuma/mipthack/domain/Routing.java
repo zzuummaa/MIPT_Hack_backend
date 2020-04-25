@@ -15,22 +15,26 @@ import javax.persistence.*;
 @Table(name = "routing")
 public class Routing {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, unique = true)
     private String id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @Column(name = "inputProduct", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "inputProduct_id", referencedColumnName = "id")
     private Product inputProduct;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @Column(name = "outputProduct", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "outputProduct_id", referencedColumnName = "id")
     private Product outputProduct;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @Column(name = "inputStockingPointId", nullable = false)
-    private StokingPoints inputStockingPointId;
+    @ManyToOne
+    @JoinColumn(name="inputStockingPointId", nullable=false)
+    private StockingPoint inputStockingPoint;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @Column(name = "outputStockingPointId", nullable = false)
-    private StokingPoints outputStockingPointId;
+    @ManyToOne
+    @JoinColumn(name="outputStockingPointId", nullable=false)
+    private StockingPoint outputStockingPoint;
+
+    public Routing(String id) {
+        this.id = id;
+    }
 }

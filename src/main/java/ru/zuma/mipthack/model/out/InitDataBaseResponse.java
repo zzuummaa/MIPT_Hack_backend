@@ -9,7 +9,7 @@ import java.time.LocalTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UploadCSVResponse extends BaseResponse {
+public class InitDataBaseResponse extends BaseResponse {
     private LocalTime workingTime;
     private int recordsCount;
 }
