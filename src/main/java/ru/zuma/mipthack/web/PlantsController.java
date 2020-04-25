@@ -3,6 +3,7 @@ package ru.zuma.mipthack.web;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.zuma.mipthack.model.out.PlantData;
@@ -40,4 +41,14 @@ public class PlantsController {
         return plantResponses;
     }
 
+    @GetMapping("/{id}")
+    public PlantResponse getPlant(@PathVariable("id") long id) {
+        ArrayList<PlantData> dataTime1 = new ArrayList<>();
+        dataTime1.add(new PlantData(LocalDate.now(), 0));
+        dataTime1.add(new PlantData(LocalDate.now().plusDays(1), 30));
+        dataTime1.add(new PlantData(LocalDate.now().plusDays(2), 50));
+        dataTime1.add(new PlantData(LocalDate.now().plusDays(3), 80));
+        dataTime1.add(new PlantData(LocalDate.now().plusDays(4), 90));
+        return new PlantResponse((long)0, "Конвертерный цех 1", "КЦ-1", dataTime1);
+    }
 }
