@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HelloWorldResponse {
+public class HelloWorldResponse extends BaseResponse {
     private String text;
 }

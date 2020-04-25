@@ -1,12 +1,17 @@
 package ru.zuma.mipthack.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
-@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Accessors(chain = true)
 @Table(name = "resource_group_period")
@@ -17,7 +22,7 @@ public class ResourceGroupPeriod {
 
     @ManyToOne
     @JoinColumn(name="resource_group_id", nullable=false)
-    private ResourceGroup resourceGroupID;
+    private ResourceGroup resourceGroup;
 
     @Column(name = "available_capacity", nullable = false)
     private Long availableCapacity;

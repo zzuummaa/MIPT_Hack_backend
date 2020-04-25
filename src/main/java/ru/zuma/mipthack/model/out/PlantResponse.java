@@ -9,7 +9,7 @@ import java.util.ArrayList;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlantResponse {
+public class PlantResponse extends BaseResponse {
     private Long id;
     private String fullName;
     private String shortName;
