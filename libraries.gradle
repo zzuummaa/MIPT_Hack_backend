@@ -1,0 +1,4 @@
+ext {
+    swaggerSpringVersion = "2.9.2"
+    swaggerVersion = "1.5.21"
+}
