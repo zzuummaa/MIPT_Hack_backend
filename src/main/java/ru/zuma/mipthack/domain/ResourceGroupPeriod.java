@@ -9,11 +9,11 @@ import lombok.experimental.Accessors;
 import javax.persistence.*;
 import java.time.LocalDate;
 
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Accessors(chain = true)
 @Table(name = "resource_group_period")
 public class ResourceGroupPeriod {
     @Id

@@ -1,5 +1,7 @@
 package ru.zuma.mipthack.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,22 +10,17 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@NoArgsConstructor
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "resource_group")
-public class ResourceGroup {
+@Table(name = "product")
+public class Product {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
 
-    @Column(name = "short_name")
-    private String shortName;
-
-    @Column(name = "full_name")
-    private String fullName;
-
-    public ResourceGroup(String id) {
-        this.id = id;
-    }
+    @Column(name = "name", nullable = false)
+    private String name;
 }
