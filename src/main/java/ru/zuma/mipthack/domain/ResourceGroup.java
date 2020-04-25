@@ -17,9 +17,9 @@ public class ResourceGroup {
     @Column(name = "id", nullable = false)
     private String id;
 
-    @Column(name = "short_name", nullable = false)
+    @Column(name = "short_name")
     private String shortName;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name")
     private String fullName;
 }

@@ -17,6 +17,9 @@ public class CorsHttpFilter implements Filter {
     @Value("${spring.headers.allow-origin}")
     private String allowOrigin;
 
+    @Value("${spring.headers.max-age}")
+    private String maxAge;
+
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;

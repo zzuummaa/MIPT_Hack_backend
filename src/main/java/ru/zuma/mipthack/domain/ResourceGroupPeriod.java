@@ -27,4 +27,7 @@ public class ResourceGroupPeriod {
 
     @Column(name = "start", nullable = false)
     private LocalDate start;
+
+    @Column(name = "has_finite_capacity", nullable = false)
+    private boolean hasFiniteCapacity;
 }
