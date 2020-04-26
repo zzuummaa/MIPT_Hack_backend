@@ -12,5 +12,5 @@ import java.util.Map;
 @NoArgsConstructor
 public class AveragePercentageResponse extends BaseResponse {
     private int average;
-    private List<Map<String, Object>> resource_groups;
+    private List<Map<String, Object>> timeData;
 }

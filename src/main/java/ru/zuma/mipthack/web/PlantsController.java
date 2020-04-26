@@ -10,16 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.zuma.mipthack.model.out.AveragePercentageResponse;
 import ru.zuma.mipthack.model.out.BaseResponse;
 import ru.zuma.mipthack.model.out.PlantResponse;
-import ru.zuma.mipthack.repository.COLsRepository;
-import ru.zuma.mipthack.repository.PlantsRepository;
 import ru.zuma.mipthack.repository.ResourceGroupPeriodsRepository;
-import ru.zuma.mipthack.repository.RoutingStepsRepository;
-import ru.zuma.mipthack.utils.TimeConverter;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,11 +34,11 @@ public class PlantsController {
 
         String query;
         if (fromTime != null && toTime != null) {
-            query = "select * from plan_view where  start >= \'"
-                    + fromTime + "\' and start <= \'" + toTime + "\'";
+            query = "select description, plant_id, avg(percent), start from plan_view where  start >= \'"
+                    + fromTime + "\' and start <= \'" + toTime + "\' group by description, plant_id, start";
             System.out.println(query);
         } else {
-            query = "select * from plan_view";
+            query = "select description, plant_id, avg(percent), start from plan_view group by description, plant_id, start";
         }
 
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
@@ -98,6 +92,18 @@ public class PlantsController {
         return new ResponseEntity<>(plantResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}/group")
+    public ResponseEntity<? extends BaseResponse> getResourceInfo(@PathVariable("id") long id,
+                                                                  @RequestParam(name = "time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time) {
+
+        String query;
+        if (time == null) {
+            query = "select * from plan_view where plant_id = " + id + " and start == \'" + time + "\'";
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @GetMapping("/average")
     public ResponseEntity<? extends BaseResponse> getAverage(@RequestParam(name = "from_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromTime,
                                                              @RequestParam(name = "to_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toTime) {
@@ -116,10 +122,10 @@ public class PlantsController {
                 .map(item -> ((BigDecimal)item.get("avg")).doubleValue())
                 .mapToDouble(Double::doubleValue).sum() / queryRes.size());
 
-        averagePercentageResponse.setResource_groups(queryRes);
-        averagePercentageResponse.setResource_groups(queryRes.stream().map(item -> {
+        averagePercentageResponse.setTimeData(queryRes);
+        averagePercentageResponse.setTimeData(queryRes.stream().map(item -> {
             Map<String, Object> out = new HashMap<>();
-            out.put("avg", ((BigDecimal)item.get("avg")).intValue());
+            out.put("percent", ((BigDecimal)item.get("avg")).intValue());
             out.put("start", item.get("start"));
             return out;
         }).collect(Collectors.toList()));
