@@ -33,4 +33,9 @@ public class Plant {
         this.id = id;
     }
 
+    public Plant(Long id, String plantName, String description) {
+        this.id = id;
+        this.plantName = plantName;
+        this.description = description;
+    }
 }

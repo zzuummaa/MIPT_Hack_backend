@@ -26,12 +26,12 @@ public class InitDataBaseController {
     @PostMapping("/")
     public BaseResponse initDataBase() {
         List<Plant> plants = new ArrayList<>();
-//        plants.add(new Plant(6L, "КЦ-1", "Конвертерный цех 1"));
-//        plants.add(new Plant(7L, "КЦ-2", "Конвертерный цех 2"));
-//        plants.add(new Plant(12L, "ЦГП", "Цех горячего проката"));
-//        plants.add(new Plant(15L, "ЦДС", "Цех динамной стали"));
-//        plants.add(new Plant(11L, "ЦТС", "Цех трансформаторной стали"));
-//        plants.add(new Plant(13L, "ЦХПП", "Цех холодного проката и покрытий"));
+        plants.add(new Plant(6L, "КЦ-1", "Конвертерный цех 1"));
+        plants.add(new Plant(7L, "КЦ-2", "Конвертерный цех 2"));
+        plants.add(new Plant(12L, "ЦГП", "Цех горячего проката"));
+        plants.add(new Plant(15L, "ЦДС", "Цех динамной стали"));
+        plants.add(new Plant(11L, "ЦТС", "Цех трансформаторной стали"));
+        plants.add(new Plant(13L, "ЦХПП", "Цех холодного проката и покрытий"));
 
         long startTime = System.currentTimeMillis();
         int count = (int)Stream.of(plantsRepository.saveAll(plants)).count();
