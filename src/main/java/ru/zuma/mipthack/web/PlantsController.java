@@ -108,7 +108,7 @@ public class PlantsController {
 
         ResourceInfoResponse resourceInfoResponse = new ResourceInfoResponse();
         resourceInfoResponse.setAverage(queryRes.stream()
-                .map(it -> ((BigDecimal)it.get("percent")).doubleValue())
+                .map(it -> ((BigDecimal)it.get("percent")).doubleValue() / queryRes.size())
                 .mapToDouble(Double::doubleValue).sum());
         resourceInfoResponse.setTimeData(new ArrayList<>());
         queryRes.forEach(it -> {
@@ -142,7 +142,7 @@ public class PlantsController {
         averagePercentageResponse.setTimeData(queryRes);
         averagePercentageResponse.setTimeData(queryRes.stream().map(item -> {
             Map<String, Object> out = new HashMap<>();
-            out.put("percent", ((BigDecimal)item.get("avg")).intValue());
+            out.put("percent", item.get("avg"));
             out.put("start", item.get("start"));
             return out;
         }).collect(Collectors.toList()));
