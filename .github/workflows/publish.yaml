@@ -27,7 +27,7 @@ jobs:
         # Чекаутим код
       - name: Build image
         # Собираем image и называем его так как указано в hub.docker т.е. login/repository:release
-        run: docker build -t $LOGIN/$NAME:release -f Dockerfile .
+        run: docker build -t $LOGIN/$NAME:worked -f Dockerfile .
       - name: Push image to docker.io
         # Пушим образ в registry
-        run: docker push $LOGIN/$NAME:release
+        run: docker push $LOGIN/$NAME:worked

@@ -104,6 +104,7 @@ public class PlantsController {
         }
 
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
+//        queryRes.
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
