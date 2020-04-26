@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.zuma.mipthack.model.out.AveragePercentageResponse;
 import ru.zuma.mipthack.model.out.BaseResponse;
 import ru.zuma.mipthack.model.out.PlantResponse;
+import ru.zuma.mipthack.model.out.ResourceInfoResponse;
 import ru.zuma.mipthack.repository.ResourceGroupPeriodsRepository;
 
 import java.math.BigDecimal;
@@ -35,10 +36,10 @@ public class PlantsController {
         String query;
         if (fromTime != null && toTime != null) {
             query = "select description, plant_id, avg(percent) percent, start from plan_view where  start >= \'"
-                    + fromTime + "\' and start <= \'" + toTime + "\' group by description, plant_id, start";
+                    + fromTime + "\' and start <= \'" + toTime + "\' group by description, plant_id, start order by start";
             System.out.println(query);
         } else {
-            query = "select description, plant_id, avg(percent) percent, start from plan_view group by description, plant_id, start";
+            query = "select description, plant_id, avg(percent) percent, start from plan_view group by description, plant_id, start order by start";
         }
 
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
@@ -104,7 +105,8 @@ public class PlantsController {
         }
 
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
-//        queryRes.
+        ResourceInfoResponse resourceInfoResponse = new ResourceInfoResponse();
+//        resourceInfoResponse.setAverage(queryRes.stream().map(it -> it.get("")));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
