@@ -99,10 +99,16 @@ public class PlantsController {
     }
 
     @GetMapping("/average")
-    public ResponseEntity<? extends BaseResponse> getAverage(@RequestParam(name = "from_time", required = false) Long fromTime,
-                                                           @RequestParam(name = "to_time", required = false) Long toTime) {
+    public ResponseEntity<? extends BaseResponse> getAverage(@RequestParam(name = "from_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromTime,
+                                                             @RequestParam(name = "to_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toTime) {
 
-        String query = "select start, avg(percent) from plan_view group by start";
+        String query;
+        if (fromTime != null && toTime != null) {
+            query = "select start, avg(percent) from plan_view where start >= \'" + fromTime + "\' and start <= \'" + toTime + "\' group by start;";
+        } else {
+            query = "select start, avg(percent) from plan_view group by start";
+        }
+
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
 
         AveragePercentageResponse averagePercentageResponse = new AveragePercentageResponse();
