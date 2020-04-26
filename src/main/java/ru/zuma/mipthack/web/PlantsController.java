@@ -115,6 +115,7 @@ public class PlantsController {
             Map<String, Object> map = new HashMap<>();
             map.put("percent", it.get("percent"));
             map.put("resource_group_id", it.get("resource_group_id"));
+            map.put("resource_grup_short_name", it.get("short_name"));
             resourceInfoResponse.getTimeData().add(map);
         });
 

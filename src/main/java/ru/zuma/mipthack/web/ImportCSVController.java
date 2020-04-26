@@ -78,8 +78,11 @@ public class ImportCSVController {
     public ResponseEntity<? extends BaseResponse> uploadGroupPeriods(@RequestParam("file") MultipartFile file) {
         return uploadFileLogic(file, () -> {
             List<ResourceGroupPeriod> periods = csvReaderService.readResourceGroupPeriods(file.getBytes());
-            Set<ResourceGroup> groups = periods.stream().map(ResourceGroupPeriod::getResourceGroup).collect(Collectors.toSet());
-            groupRepository.saveAll(groups);
+
+            Map<String, ResourceGroup> groups = periods.stream().map(ResourceGroupPeriod::getResourceGroup).collect(Collectors.toMap(ResourceGroup::getId, Function.identity(), this::mergeFunction));
+            groupRepository.findAllById(groups.keySet()).forEach(it -> groups.remove(it.getId()));
+            groupRepository.saveAll(groups.values());
+
             long periodsCount = Stream.of(periodsRepository.saveAll(periods)).count();
             return new ResponseEntity<>( new InitDataBaseResponse(null, (int)periodsCount), HttpStatus.OK);
         });
