@@ -93,23 +93,33 @@ public class PlantsController {
         return new ResponseEntity<>(plantResponse, HttpStatus.OK);
     }
 
-//    @GetMapping("/{id}/group")
-//    public ResponseEntity<? extends BaseResponse> getResourceInfo(@PathVariable("id") long id,
-//                                                                  @RequestParam(name = "time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time) {
-//
-//        String query;
-//        if (time != null) {
-//            query = "select * from plan_view where plant_id = " + id + " and start == \'" + time + "\'";
-//        } else {
-//            query = "select * from plan_view where plant_id = " + id;
-//        }
-//
-//        List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
-//        ResourceInfoResponse resourceInfoResponse = new ResourceInfoResponse();
-//        resourceInfoResponse.setAverage(queryRes.stream().map(it -> it.get("percent")));
-//
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
+    @GetMapping("/{id}/group")
+    public ResponseEntity<? extends BaseResponse> getResourceInfo(@PathVariable("id") long id,
+                                                                  @RequestParam(name = "time") @DateTimeFormat(pattern = "yyyy-MM-dd") Date time) {
+
+        String query;
+        if (time != null) {
+            query = "select * from plan_view where plant_id = " + id + " and start = \'" + time + "\'";
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
+
+        ResourceInfoResponse resourceInfoResponse = new ResourceInfoResponse();
+        resourceInfoResponse.setAverage(queryRes.stream()
+                .map(it -> ((BigDecimal)it.get("percent")).doubleValue())
+                .mapToDouble(Double::doubleValue).sum());
+        resourceInfoResponse.setTimeData(new ArrayList<>());
+        queryRes.forEach(it -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("percent", it.get("percent"));
+            map.put("resource_group_id", it.get("resource_group_id"));
+            resourceInfoResponse.getTimeData().add(map);
+        });
+
+        return new ResponseEntity<>(resourceInfoResponse, HttpStatus.OK);
+    }
 
     @GetMapping("/average")
     public ResponseEntity<? extends BaseResponse> getAverage(@RequestParam(name = "from_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromTime,
@@ -125,7 +135,7 @@ public class PlantsController {
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
 
         AveragePercentageResponse averagePercentageResponse = new AveragePercentageResponse();
-        averagePercentageResponse.setAverage((int)queryRes.stream()
+        averagePercentageResponse.setAverage(queryRes.stream()
                 .map(item -> ((BigDecimal)item.get("avg")).doubleValue())
                 .mapToDouble(Double::doubleValue).sum() / queryRes.size());
 

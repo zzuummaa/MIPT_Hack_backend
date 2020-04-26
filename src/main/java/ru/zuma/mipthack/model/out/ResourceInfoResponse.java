@@ -13,6 +13,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResourceInfoResponse extends BaseResponse {
-    private String average;
+    private double average;
     private List<Map<String, Object>> timeData;
 }
