@@ -93,23 +93,23 @@ public class PlantsController {
         return new ResponseEntity<>(plantResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/group")
-    public ResponseEntity<? extends BaseResponse> getResourceInfo(@PathVariable("id") long id,
-                                                                  @RequestParam(name = "time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time) {
-
-        String query;
-        if (time != null) {
-            query = "select plant_id from plan_view where plant_id = " + id + " and start == \'" + time + "\'";
-        } else {
-            query = "select * from plan_view where plant_id = " + id;
-        }
-
-        List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
-        ResourceInfoResponse resourceInfoResponse = new ResourceInfoResponse();
-//        resourceInfoResponse.setAverage(queryRes.stream().map(it -> it.get("")));
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+//    @GetMapping("/{id}/group")
+//    public ResponseEntity<? extends BaseResponse> getResourceInfo(@PathVariable("id") long id,
+//                                                                  @RequestParam(name = "time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time) {
+//
+//        String query;
+//        if (time != null) {
+//            query = "select * from plan_view where plant_id = " + id + " and start == \'" + time + "\'";
+//        } else {
+//            query = "select * from plan_view where plant_id = " + id;
+//        }
+//
+//        List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
+//        ResourceInfoResponse resourceInfoResponse = new ResourceInfoResponse();
+//        resourceInfoResponse.setAverage(queryRes.stream().map(it -> it.get("percent")));
+//
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
 
     @GetMapping("/average")
     public ResponseEntity<? extends BaseResponse> getAverage(@RequestParam(name = "from_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromTime,
