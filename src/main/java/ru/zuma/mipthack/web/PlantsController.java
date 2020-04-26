@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import ru.zuma.mipthack.domain.ResourceGroupPeriod;
 import ru.zuma.mipthack.domain.RoutingStep;
@@ -18,7 +19,9 @@ import ru.zuma.mipthack.repository.RoutingStepsRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -31,24 +34,43 @@ public class PlantsController {
     private final ResourceGroupPeriodsRepository resourceGroupPeriodsRepository;
     private final COLsRepository coLsRepository;
 
+    private final JdbcTemplate jdbcTemplate;
+
     @GetMapping("/")
-    public ArrayList<PlantResponse> getPlants(@RequestParam(name = "from_time", required = false) Long fromTime,
-                                              @RequestParam(name = "to_time", required = false) Long toTime) {
+    public ArrayList<PlantResponse> getPlants(@RequestParam(name = "from_time") Long fromTime,
+                                              @RequestParam(name = "to_time") Long toTime) {
+
+        List<Map<String, Object>> queryRes = jdbcTemplate.queryForList("select * from plan_view");
+
+        Map<Long, List<Map<String, Object>>> plants = new HashMap<>();
+        queryRes.forEach(item -> {
+            Long key = (Long) item.get("plant_id");
+            if (!plants.containsKey(key)) plants.put(key, new ArrayList<>());
+            plants.get(key).add(item);
+        });
 
         ArrayList<PlantResponse> plantResponses = new ArrayList<>();
-        plantsRepository.findAll().forEach(item -> {
-            ArrayList<PlantData> plantDatas = new ArrayList<>();
-            item.getCol().forEach(element -> {
-                resourceGroupPeriodsRepository.findById(element.getResourceGroup().iterator().next().getId()).ifPresent(it -> {
-                    plantDatas.add(new PlantData(
-                        it.getStart(),
-                        it.getPercentage(),
-                        it.isHasFiniteCapacity()
-                    ));
-                });
-            });
-            plantResponses.add(new PlantResponse(item.getId(), item.getPlantName(), item.getDescription(), plantDatas));
+        plants.keySet().forEach(item -> {
+            PlantResponse plantResponse = new PlantResponse();
+            plantResponse.setId(item);
+            plantResponse.setFullName((String) plants.get(item).get(0).get("description"));
+            plantResponse.setTimeData(plants.get(item));
         });
+
+//        ArrayList<PlantResponse> plantResponses = new ArrayList<>();
+//        plantsRepository.findAll().forEach(item -> {
+//            ArrayList<PlantData> plantDatas = new ArrayList<>();
+//            item.getCol().forEach(element -> {
+//                resourceGroupPeriodsRepository.findById(element.getResourceGroup().iterator().next().getId()).ifPresent(it -> {
+//                    plantDatas.add(new PlantData (
+//                        it.getStart(),
+//                        it.getPercentage(),
+//                        it.isHasFiniteCapacity()
+//                    ));
+//                });
+//            });
+//            plantResponses.add(new PlantResponse(item.getId(), item.getPlantName(), item.getDescription(), plantDatas));
+//        });
 
 //        ArrayList<PlantData> dataTime1 = new ArrayList<>();
 //        dataTime1.add(new PlantData(LocalDate.now().plusDays(0), 0 , false));
@@ -78,26 +100,26 @@ public class PlantsController {
                                                            @PathVariable("id") long id) {
 
 
-        PlantResponse[] plantResponses = new PlantResponse[1];
-        plantsRepository.findById(id).ifPresent(item -> {
-            ArrayList<PlantData> plantDatas = new ArrayList<>();
-            item.getCol().forEach(element -> {
-                resourceGroupPeriodsRepository.findById(element.getResourceGroup().iterator().next().getId()).ifPresent(it -> {
-                    plantDatas.add(new PlantData(
-                            it.getStart(),
-                            it.getPercentage(),
-                            it.isHasFiniteCapacity()
-                    ));
-                });
-            });
-            plantResponses[0] = new PlantResponse(item.getId(), item.getPlantName(), item.getDescription(), plantDatas);
-        });
-
-        if (plantResponses[0] == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(plantResponses[0], HttpStatus.OK);
-        }
+//        PlantResponse[] plantResponses = new PlantResponse[1];
+//        plantsRepository.findById(id).ifPresent(item -> {
+//            ArrayList<PlantData> plantDatas = new ArrayList<>();
+//            item.getCol().forEach(element -> {
+//                resourceGroupPeriodsRepository.findById(element.getResourceGroup().iterator().next().getId()).ifPresent(it -> {
+//                    plantDatas.add(new PlantData(
+//                            it.getStart(),
+//                            it.getPercentage(),
+//                            it.isHasFiniteCapacity()
+//                    ));
+//                });
+//            });
+//            plantResponses[0] = new PlantResponse(item.getId(), item.getPlantName(), item.getDescription(), plantDatas);
+//        });
+//
+//        if (plantResponses[0] == null) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        } else {
+//            return new ResponseEntity<>(plantResponses[0], HttpStatus.OK);
+//        }
 //        ArrayList<PlantData> dataTime1 = new ArrayList<>();
 //        dataTime1.add(new PlantData(LocalDate.now().plusDays(0), 0 , false));
 //        dataTime1.add(new PlantData(LocalDate.now().plusDays(1), 30, false));
@@ -105,5 +127,6 @@ public class PlantsController {
 //        dataTime1.add(new PlantData(LocalDate.now().plusDays(3), 80, false));
 //        dataTime1.add(new PlantData(LocalDate.now().plusDays(4), 90, false));
 //        return new PlantResponse((long)0, "Конвертерный цех 1", "КЦ-1", dataTime1);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

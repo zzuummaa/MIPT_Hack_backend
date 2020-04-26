@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -15,5 +17,5 @@ public class PlantResponse extends BaseResponse {
     private Long id;
     private String fullName;
     private String shortName;
-    private ArrayList<PlantData> timeData;
+    private List<Map<String, Object>> timeData;
 }
