@@ -125,7 +125,7 @@ public class CSVReaderServiceImpl implements CSVReaderService {
 
         try (Scanner scanner = new Scanner(new ByteArrayInputStream(bytes))) {
             while (scanner.hasNextLine()) {
-                List<String> line = getRecordFromLine(scanner.nextLine(), COMMA_DELIMITER);
+                List<String> line = getRecordFromLine(scanner.nextLine(), SEMICOLON_DELIMITER);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 records.add(ResourceGroupPeriod.builder()
                         .resourceGroup(new ResourceGroup(line.get(ResourcesGroupPeriodNums.RESOURCE_GROUP_ID_NUM)))
