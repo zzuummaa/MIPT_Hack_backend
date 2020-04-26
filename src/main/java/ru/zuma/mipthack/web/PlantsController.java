@@ -34,11 +34,11 @@ public class PlantsController {
 
         String query;
         if (fromTime != null && toTime != null) {
-            query = "select description, plant_id, avg(percent), start from plan_view where  start >= \'"
+            query = "select description, plant_id, avg(percent) percent, start from plan_view where  start >= \'"
                     + fromTime + "\' and start <= \'" + toTime + "\' group by description, plant_id, start";
             System.out.println(query);
         } else {
-            query = "select description, plant_id, avg(percent), start from plan_view group by description, plant_id, start";
+            query = "select description, plant_id, avg(percent) percent, start from plan_view group by description, plant_id, start";
         }
 
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
@@ -97,9 +97,13 @@ public class PlantsController {
                                                                   @RequestParam(name = "time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time) {
 
         String query;
-        if (time == null) {
-            query = "select * from plan_view where plant_id = " + id + " and start == \'" + time + "\'";
+        if (time != null) {
+            query = "select plant_id from plan_view where plant_id = " + id + " and start == \'" + time + "\'";
+        } else {
+            query = "select * from plan_view where plant_id = " + id;
         }
+
+        List<Map<String, Object>> queryRes = jdbcTemplate.queryForList(query);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
