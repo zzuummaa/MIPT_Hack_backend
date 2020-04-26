@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,8 +21,9 @@ import ru.zuma.mipthack.utils.TimeConverter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +38,10 @@ public class ImportCSVController {
         R execute() throws IOException;
     }
 
+    <T> T mergeFunction(T a, T b) {
+        return a;
+    }
+
     private final CSVReaderService csvReaderService;
     private final ResourceGroupPeriodsRepository periodsRepository;
     private final ResourceGroupsRepository groupRepository;
@@ -44,6 +50,7 @@ public class ImportCSVController {
     private final StockingPointsRepository stockingPointsRepository;
     private final RoutingRepository routingRepository;
     private final RoutingStepsRepository routingStepsRepository;
+    private final PlantsRepository plantsRepository;
 
     private ResponseEntity<? extends BaseResponse> uploadFileLogic(MultipartFile file, CheckedFunction<ResponseEntity<BaseResponse>> logic) {
         if (!file.isEmpty()) {
@@ -97,36 +104,113 @@ public class ImportCSVController {
     @PostMapping("/routings")
     public ResponseEntity<? extends BaseResponse> uploadRoutings(@RequestParam("start_line") int startLine, @RequestParam("file") MultipartFile file) {
         return uploadFileLogic(file, () -> {
-            List<Routing> routings = csvReaderService.readRoutings(file.getBytes()).stream().skip(startLine).limit(50_000).collect(Collectors.toList());
+            List<Routing> routingsAll = csvReaderService.readRoutings(file.getBytes()).stream().skip(startLine).collect(Collectors.toList());
 
-            Set<StockingPoint> stockingPoints = routings.stream()
-                    .map(Routing::getInputStockingPoint)
-                    .collect(Collectors.toSet());
-            Set<StockingPoint> outputStockingPoints = routings.stream()
-                    .map(Routing::getOutputStockingPoint)
-                    .collect(Collectors.toSet());
-            stockingPoints.addAll(outputStockingPoints);
-            stockingPointsRepository.saveAll(stockingPoints);
+            int routingOldSize = routingsAll.size();
+            long startTime = System.currentTimeMillis();
+            while (routingsAll.size() > 0 && System.currentTimeMillis() - startTime < 1000 * 60 * 10) {
+                Map<String, Routing> routings = routingsAll.stream().limit(1000).collect(Collectors.toMap(Routing::getId, Function.identity(), this::mergeFunction));
+                routingsAll.removeAll(routings.values());
 
-            Set<Product> products = routings.stream().map(Routing::getInputProduct).collect(Collectors.toSet());
-            Set<Product> outputProducts = routings.stream().map(Routing::getOutputProduct).collect(Collectors.toSet());
-            products.addAll(outputProducts);
-            productRepository.saveAll(products);
+                Set<StockingPoint> stockingPoints = routings.values().stream()
+                        .map(Routing::getInputStockingPoint)
+                        .collect(Collectors.toSet());
+                Set<StockingPoint> outputStockingPoints = routings.values().stream()
+                        .map(Routing::getOutputStockingPoint)
+                        .collect(Collectors.toSet());
+                stockingPoints.addAll(outputStockingPoints);
+                stockingPointsRepository.saveAll(stockingPoints);
 
-            routingRepository.saveAll(routings);
-            return new ResponseEntity<>( new InitDataBaseResponse(null, routings.size()), HttpStatus.OK);
+                Map<String, Product> products = routings.values().stream()
+                        .map(Routing::getInputProduct)
+                        .collect(Collectors.toMap(Product::getId, Function.identity(), this::mergeFunction));
+                Map<String, Product> outputProducts = routings.values().stream()
+                        .map(Routing::getOutputProduct)
+                        .collect(Collectors.toMap(Product::getId, Function.identity(), this::mergeFunction));
+                products.putAll(outputProducts);
+                productRepository.findAllById(products.keySet()).forEach((item) -> { products.remove(item.getId()); });
+                productRepository.saveAll(products.values());
+
+
+                routingRepository.findAllById(routings.keySet()).forEach((item) -> { routings.remove(item.getId()); });
+                routingRepository.saveAll(routings.values());
+            }
+
+            return new ResponseEntity<>( new InitDataBaseResponse(null, routingOldSize - routingsAll.size()), HttpStatus.OK);
         });
     }
 
     @PostMapping("/routing_steps")
-    public ResponseEntity<? extends BaseResponse> uploadRoutingSteps(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<? extends BaseResponse> uploadRoutingSteps(@RequestParam("start_line") int startLine, @RequestParam("file") MultipartFile file) {
+        return uploadFileLogic(file, () -> {
+            List<RoutingStep> routingStepsAll = csvReaderService.readRoutingSteps(file.getBytes()).stream().skip(startLine).collect(Collectors.toList());
+
+            int routingStepsOldSize = routingStepsAll.size();
+            long startTime = System.currentTimeMillis();
+            while (routingStepsAll.size() > 0 && System.currentTimeMillis() - startTime < 1000 * 60 * 10) {
+                Map<String, RoutingStep> routingSteps = routingStepsAll.stream().limit(1000).collect(Collectors.toMap(RoutingStep::getId, Function.identity(), this::mergeFunction));
+                routingStepsAll.removeAll(routingSteps.values());
+
+                Map<Long, Plant> plants = routingSteps.values().stream()
+                        .map(RoutingStep::getPlant)
+                        .collect(Collectors.toMap(Plant::getId, Function.identity(), this::mergeFunction));
+
+                plantsRepository.findAllById(plants.keySet()).forEach(item -> plants.remove(item.getId()));
+                plantsRepository.saveAll(plants.values());
+
+                Map<String, Routing> routings = routingSteps.values().stream().map(RoutingStep::getRouting).collect(Collectors.toMap(Routing::getId, Function.identity(), this::mergeFunction));
+                routingRepository.findAllById(routings.keySet()).forEach(element -> routings.remove(element.getId()));
+                routingRepository.saveAll(routings.values());
+
+                Map<String, ResourceGroup> resourceGroups = routingSteps.values().stream().map(RoutingStep::getResourceGroup).collect(Collectors.toMap(ResourceGroup::getId, Function.identity(), this::mergeFunction));
+                groupRepository.findAllById(resourceGroups.keySet()).forEach(element -> resourceGroups.remove(element.getId()));
+                groupRepository.saveAll(resourceGroups.values());
+
+                routingStepsRepository.findAllById(routingSteps.keySet()).forEach(item -> routingSteps.remove(item.getId()));
+                routingStepsRepository.saveAll(routingSteps.values());
+            }
+
+            return new ResponseEntity<>( new InitDataBaseResponse(null, routingStepsOldSize - routingStepsAll.size()), HttpStatus.OK);
+        });
+    }
+
+    @PostMapping("/routing_steps/plants")
+    public ResponseEntity<? extends BaseResponse> uploadRoutingStepsPlants(@RequestParam("start_line") int startLine, @RequestParam("file") MultipartFile file) {
         return uploadFileLogic(file, () -> {
             List<RoutingStep> routingSteps = csvReaderService.readRoutingSteps(file.getBytes());
 
+            Map<Long, Plant> plants = routingSteps.stream().map(RoutingStep::getPlant).collect(Collectors.toMap(Plant::getId, Function.identity(), this::mergeFunction));
+            plantsRepository.findAllById(plants.keySet()).forEach(item -> plants.remove(item.getId()));
+            plantsRepository.saveAll(plants.values());
 
+            return new ResponseEntity<>( new InitDataBaseResponse(null, plants.size()), HttpStatus.OK);
+        });
+    }
 
-            long count = Stream.of(routingStepsRepository.saveAll(routingSteps)).count();
-            return new ResponseEntity<>( new InitDataBaseResponse(null, (int)count), HttpStatus.OK);
+    @PostMapping("/routing_steps/routings")
+    public ResponseEntity<? extends BaseResponse> uploadRoutingStepsRoutings(@RequestParam("file") MultipartFile file) {
+        return uploadFileLogic(file, () -> {
+            List<RoutingStep> routingSteps = csvReaderService.readRoutingSteps(file.getBytes());
+
+            Map<String, Routing> routings = routingSteps.stream().map(RoutingStep::getRouting).collect(Collectors.toMap(Routing::getId, Function.identity(), this::mergeFunction));
+            routingRepository.findAllById(routings.keySet()).forEach(element -> routings.remove(element.getId()));
+            routingRepository.saveAll(routings.values().stream().limit(32000).collect(Collectors.toList()));
+
+            return new ResponseEntity<>( new InitDataBaseResponse(null, routings.size()), HttpStatus.OK);
+        });
+    }
+
+    @Transactional
+    @PostMapping("/routing_steps/resourceGroups")
+    public ResponseEntity<? extends BaseResponse> uploadRoutingStepsResourceGroups(@RequestParam("start_line") int start_line, @RequestParam("file") MultipartFile file) {
+        return uploadFileLogic(file, () -> {
+            List<RoutingStep> routingSteps = csvReaderService.readRoutingSteps(file.getBytes());
+
+            Map<String, ResourceGroup> resourceGroups = routingSteps.stream().map(RoutingStep::getResourceGroup).skip(start_line).limit(32000).collect(Collectors.toMap(ResourceGroup::getId, Function.identity(), this::mergeFunction));
+            groupRepository.findAllById(resourceGroups.keySet()).forEach(element -> resourceGroups.remove(element.getId()));
+            groupRepository.saveAll(resourceGroups.values());
+
+            return new ResponseEntity<>( new InitDataBaseResponse(null, resourceGroups.size()), HttpStatus.OK);
         });
     }
 }

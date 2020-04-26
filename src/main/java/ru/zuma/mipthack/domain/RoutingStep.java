@@ -21,18 +21,18 @@ public class RoutingStep {
     @Column(name = "sequenceNr", nullable = false)
     private int sequenceNr;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name="routing_id", nullable=false)
     private Routing routing;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name="resourceGroupId", nullable=false)
     private ResourceGroup resourceGroup;
 
     @Column(name = "yield", nullable = false)
     private double yield;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name="plant_id", nullable=false)
     private Plant plant;
 }

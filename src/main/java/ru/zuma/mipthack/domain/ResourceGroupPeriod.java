@@ -35,4 +35,8 @@ public class ResourceGroupPeriod {
 
     @Column(name = "has_finite_capacity", nullable = false)
     private boolean hasFiniteCapacity;
+
+    public int getPercentage() {
+        return (int)((availableCapacity == 0 ? 1 : freeCapacity / availableCapacity) * 100);
+    }
 }

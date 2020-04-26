@@ -5,10 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @Builder
@@ -23,6 +21,9 @@ public class Product {
 
     @Column(name = "name")
     private String name;
+
+//    @OneToMany(mappedBy="product_routings")
+//    private Set<Routing> routings;
 
     public Product(String id) {
         this.id = id;

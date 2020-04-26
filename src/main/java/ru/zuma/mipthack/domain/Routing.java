@@ -27,11 +27,11 @@ public class Routing {
     private Product outputProduct;
 
     @ManyToOne
-    @JoinColumn(name="inputStockingPointId", nullable=false)
+    @JoinColumn(name="inputStockingPointId")
     private StockingPoint inputStockingPoint;
 
     @ManyToOne
-    @JoinColumn(name="outputStockingPointId", nullable=false)
+    @JoinColumn(name="outputStockingPointId")
     private StockingPoint outputStockingPoint;
 
     public Routing(String id) {
