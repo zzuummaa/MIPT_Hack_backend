@@ -37,8 +37,8 @@ public class PlantsController {
     private final JdbcTemplate jdbcTemplate;
 
     @GetMapping("/")
-    public ArrayList<PlantResponse> getPlants(@RequestParam(name = "from_time") Long fromTime,
-                                              @RequestParam(name = "to_time") Long toTime) {
+    public ArrayList<PlantResponse> getPlants(@RequestParam(name = "from_time", required = false) Long fromTime,
+                                              @RequestParam(name = "to_time", required = false) Long toTime) {
 
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList("select * from plan_view");
 
