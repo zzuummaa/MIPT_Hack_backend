@@ -37,8 +37,7 @@ public class PlantsController {
     private final JdbcTemplate jdbcTemplate;
 
     @GetMapping("/")
-    public ArrayList<PlantResponse> getPlants(@RequestParam(name = "from_time", required = false) Long fromTime,
-                                              @RequestParam(name = "to_time", required = false) Long toTime) {
+    public ArrayList<PlantResponse> getPlants() {
 
         List<Map<String, Object>> queryRes = jdbcTemplate.queryForList("select * from plan_view");
 
@@ -55,6 +54,7 @@ public class PlantsController {
             plantResponse.setId(item);
             plantResponse.setFullName((String) plants.get(item).get(0).get("description"));
             plantResponse.setTimeData(plants.get(item));
+            plantResponses.add(plantResponse);
         });
 
 //        ArrayList<PlantResponse> plantResponses = new ArrayList<>();
